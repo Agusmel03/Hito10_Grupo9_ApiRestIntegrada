@@ -1,0 +1,13 @@
+id_sede,nombre,ciudad,pais,capacidad
+S001,Estadio Buenos Aires,Buenos Aires,Argentina,70000
+S002,Estadio Montevideo,Montevideo,Uruguay,60000
+S003,Estadio Asuncion,Asuncion,Paraguay,55000
+S004,Estadio Madrid,Madrid,Espana,75000
+S005,Estadio Barcelona,Barcelona,Espana,68000
+S006,Estadio Lisboa,Lisboa,Portugal,65000
+S007,Estadio Porto,Porto,Portugal,52000
+S008,Estadio Casablanca,Casablanca,Marruecos,67000
+S009,Estadio Rabat,Rabat,Marruecos,60000
+S010,Estadio Sevilla,Sevilla,Espana,58000
+S011,Estadio Marrakech,Marrakech,Marruecos,56000
+S012,Estadio Valencia,Valencia,Espana,54000

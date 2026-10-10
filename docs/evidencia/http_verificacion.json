@@ -1,0 +1,748 @@
+{
+  "timestamp_utc": "2026-10-10T22:15:07.827103+00:00",
+  "method": "HTTP GET secuencial; una request por caso, sin calentamiento ni concurrencia",
+  "environment": "Docker Desktop ARM64; cliente y API en contenedores; laboratorio local",
+  "limitations": "Muestra pequena; no es un benchmark de capacidad. Latencia incluye HTTP y consulta.",
+  "results": [
+    {
+      "case": "Equipos",
+      "path": "/api/v1/equipos",
+      "query": {
+        "limite": 10
+      },
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 27.09,
+      "request_id": "5072548f-7b5d-4f8b-b687-7bf2e40aafa0",
+      "response": {
+        "data": {
+          "items": [
+            {
+              "id": "000000000000000000000001",
+              "codigo_fifa": "AAA",
+              "nombre": "Seleccion 01",
+              "confederacion": "AFC",
+              "entrenador": "Entrenador 1",
+              "ranking_fifa": 1
+            },
+            {
+              "id": "000000000000000000000002",
+              "codigo_fifa": "AAB",
+              "nombre": "Seleccion 02",
+              "confederacion": "CAF",
+              "entrenador": "Entrenador 2",
+              "ranking_fifa": 2
+            },
+            {
+              "id": "000000000000000000000003",
+              "codigo_fifa": "AAC",
+              "nombre": "Seleccion 03",
+              "confederacion": "CONCACAF",
+              "entrenador": "Entrenador 3",
+              "ranking_fifa": 3
+            },
+            {
+              "id": "000000000000000000000004",
+              "codigo_fifa": "AAD",
+              "nombre": "Seleccion 04",
+              "confederacion": "CONMEBOL",
+              "entrenador": "Entrenador 4",
+              "ranking_fifa": 4
+            },
+            {
+              "id": "000000000000000000000005",
+              "codigo_fifa": "AAE",
+              "nombre": "Seleccion 05",
+              "confederacion": "OFC",
+              "entrenador": "Entrenador 5",
+              "ranking_fifa": 5
+            },
+            {
+              "id": "000000000000000000000006",
+              "codigo_fifa": "AAF",
+              "nombre": "Seleccion 06",
+              "confederacion": "UEFA",
+              "entrenador": "Entrenador 6",
+              "ranking_fifa": 6
+            },
+            {
+              "id": "000000000000000000000007",
+              "codigo_fifa": "AAG",
+              "nombre": "Seleccion 07",
+              "confederacion": "AFC",
+              "entrenador": "Entrenador 7",
+              "ranking_fifa": 7
+            },
+            {
+              "id": "000000000000000000000008",
+              "codigo_fifa": "AAH",
+              "nombre": "Seleccion 08",
+              "confederacion": "CAF",
+              "entrenador": "Entrenador 8",
+              "ranking_fifa": 8
+            },
+            {
+              "id": "000000000000000000000009",
+              "codigo_fifa": "AAI",
+              "nombre": "Seleccion 09",
+              "confederacion": "CONCACAF",
+              "entrenador": "Entrenador 9",
+              "ranking_fifa": 9
+            },
+            {
+              "id": "00000000000000000000000a",
+              "codigo_fifa": "AAJ",
+              "nombre": "Seleccion 10",
+              "confederacion": "CONMEBOL",
+              "entrenador": "Entrenador 10",
+              "ranking_fifa": 10
+            }
+          ],
+          "siguiente_codigo": "AAJ"
+        }
+      }
+    },
+    {
+      "case": "Equipo AAA",
+      "path": "/api/v1/equipos/AAA",
+      "query": {},
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 1.65,
+      "request_id": "c6c7f421-03d0-42f8-adb6-5863fd84cefb",
+      "response": {
+        "data": {
+          "id": "000000000000000000000001",
+          "codigo_fifa": "AAA",
+          "nombre": "Seleccion 01",
+          "confederacion": "AFC",
+          "entrenador": "Entrenador 1",
+          "ranking_fifa": 1
+        }
+      }
+    },
+    {
+      "case": "Eventos P001",
+      "path": "/api/v1/partidos/P001/eventos",
+      "query": {},
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 51.56,
+      "request_id": "2ad48487-9be1-4087-bde9-42298e943fc1",
+      "response": {
+        "data": {
+          "partido_id": "P001",
+          "items": [
+            {
+              "id_evento": "E0001",
+              "tipo": "Gol",
+              "minuto": 18,
+              "descripcion": "Gol del partido",
+              "jugador_id": "0000000000000000000186b4"
+            },
+            {
+              "id_evento": "E0002",
+              "tipo": "Tarjeta amarilla",
+              "minuto": 43,
+              "descripcion": "Tarjeta amarilla del partido",
+              "jugador_id": "0000000000000000000186bf"
+            },
+            {
+              "id_evento": "E0003",
+              "tipo": "Gol",
+              "minuto": 71,
+              "descripcion": "Gol del partido",
+              "jugador_id": "0000000000000000000186cd"
+            }
+          ],
+          "siguiente_offset": null
+        }
+      }
+    },
+    {
+      "case": "Comentarios P001",
+      "path": "/api/v1/partidos/P001/comentarios",
+      "query": {
+        "bucket_10m": "2030-06-10T18:00:00Z",
+        "shard": 0,
+        "limite": 7
+      },
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 13.42,
+      "request_id": "a34db59a-0a9b-47d1-882b-4ee96a0ab573",
+      "response": {
+        "data": {
+          "partido_id": "P001",
+          "bucket_10m": "2030-06-10T18:00:00Z",
+          "shard": 0,
+          "items": [
+            {
+              "comentario_id": "00000000-0000-0000-0000-00000000001e",
+              "creado_en": "2030-06-10T18:02:25Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 30 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-00000000001d",
+              "creado_en": "2030-06-10T18:02:20Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 29 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-00000000001c",
+              "creado_en": "2030-06-10T18:02:15Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 28 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-00000000001b",
+              "creado_en": "2030-06-10T18:02:10Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 27 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-00000000001a",
+              "creado_en": "2030-06-10T18:02:05Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 26 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-000000000019",
+              "creado_en": "2030-06-10T18:02:00Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 25 del Fixture 2030"
+            },
+            {
+              "comentario_id": "00000000-0000-0000-0000-000000000018",
+              "creado_en": "2030-06-10T18:01:55Z",
+              "usuario_id": "USR001",
+              "contenido": "Comentario de laboratorio 24 del Fixture 2030"
+            }
+          ],
+          "siguiente_cursor": "qFmSnknkRIfYhKqkqJvB4VpFEzXpGHd8S7JIt2Imlt97InN0YXRlIjoiQUJzQUNBQUFBYndXbmJvNEVBQUFBQUFBQUFBQUFBQUFBQUFBQUJqd2YvLy8rUEIvLy8vNCIsInBhcnRpdGlvbiI6WyJQMDAxIiwiMjAzMC0wNi0xMFQxODowMDowMCswMDowMCIsMCw3XSwiZXhwaXJlcyI6MTc5MTY3NDEwN30="
+        }
+      }
+    },
+    {
+      "case": "Sesion vigente",
+      "path": "/api/v1/sesiones/sess-demo-001",
+      "query": {},
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 6.36,
+      "request_id": "c9d7fb1f-d74c-42b8-8be0-6c70292cc903",
+      "response": {
+        "data": {
+          "session_id": "sess-demo-001",
+          "estado": "activa",
+          "ultima_actividad": "2030-06-10T18:00:00Z",
+          "ttl_segundos": 1553
+        }
+      }
+    },
+    {
+      "case": "Estadisticas P001",
+      "path": "/api/v1/partidos/P001/estadisticas",
+      "query": {
+        "desde": "2030-06-08T19:00:00Z",
+        "hasta": "2030-06-08T20:30:00Z",
+        "resolucion": "5m"
+      },
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 89.19,
+      "request_id": "c229f968-efb8-4d14-8652-9a3b9b2f5725",
+      "response": {
+        "data": {
+          "partido_id": "P001",
+          "desde": "2030-06-08T19:00:00Z",
+          "hasta": "2030-06-08T20:30:00Z",
+          "resolucion": "5m",
+          "items": [
+            {
+              "tiempo": "2030-06-08T19:05:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 48.133833333333335,
+              "pases_completados_total": 32,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T19:05:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 51.86616666666666,
+              "pases_completados_total": 35,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:10:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 46.47500000000001,
+              "pases_completados_total": 67,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 4
+            },
+            {
+              "tiempo": "2030-06-08T19:10:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 53.52499999999999,
+              "pases_completados_total": 60,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:15:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 44.55833333333335,
+              "pases_completados_total": 96,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 1
+            },
+            {
+              "tiempo": "2030-06-08T19:15:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 55.44166666666664,
+              "pases_completados_total": 93,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:20:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 47.169,
+              "pases_completados_total": 132,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 0
+            },
+            {
+              "tiempo": "2030-06-08T19:20:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 52.831,
+              "pases_completados_total": 115,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:25:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 46.48933333333331,
+              "pases_completados_total": 163,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 3
+            },
+            {
+              "tiempo": "2030-06-08T19:25:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 53.51066666666668,
+              "pases_completados_total": 141,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 4
+            },
+            {
+              "tiempo": "2030-06-08T19:30:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 48.07600000000001,
+              "pases_completados_total": 195,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 3
+            },
+            {
+              "tiempo": "2030-06-08T19:30:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 51.923999999999985,
+              "pases_completados_total": 178,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:35:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 47.99466666666669,
+              "pases_completados_total": 232,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 4
+            },
+            {
+              "tiempo": "2030-06-08T19:35:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 52.00533333333332,
+              "pases_completados_total": 200,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 1
+            },
+            {
+              "tiempo": "2030-06-08T19:40:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 46.449500000000015,
+              "pases_completados_total": 261,
+              "tiros_intervalo": 4,
+              "recuperaciones_intervalo": 1
+            },
+            {
+              "tiempo": "2030-06-08T19:40:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 53.55049999999999,
+              "pases_completados_total": 229,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T19:45:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 45.539500000000004,
+              "pases_completados_total": 299,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 4
+            },
+            {
+              "tiempo": "2030-06-08T19:45:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 54.46049999999999,
+              "pases_completados_total": 261,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 3
+            },
+            {
+              "tiempo": "2030-06-08T19:50:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 45.153000000000006,
+              "pases_completados_total": 332,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 6
+            },
+            {
+              "tiempo": "2030-06-08T19:50:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 54.847,
+              "pases_completados_total": 278,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T19:55:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 44.98400000000001,
+              "pases_completados_total": 352,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 0
+            },
+            {
+              "tiempo": "2030-06-08T19:55:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 55.015999999999984,
+              "pases_completados_total": 303,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T20:00:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 43.726,
+              "pases_completados_total": 386,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 3
+            },
+            {
+              "tiempo": "2030-06-08T20:00:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 56.274,
+              "pases_completados_total": 326,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:05:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 43.1335,
+              "pases_completados_total": 421,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T20:05:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 56.8665,
+              "pases_completados_total": 345,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:10:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 43.67383333333332,
+              "pases_completados_total": 453,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:10:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 56.32616666666667,
+              "pases_completados_total": 375,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:15:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 44.361666666666665,
+              "pases_completados_total": 488,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:15:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 55.638333333333335,
+              "pases_completados_total": 407,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 1
+            },
+            {
+              "tiempo": "2030-06-08T20:20:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 43.933333333333344,
+              "pases_completados_total": 528,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 1
+            },
+            {
+              "tiempo": "2030-06-08T20:20:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 56.06666666666667,
+              "pases_completados_total": 433,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 4
+            },
+            {
+              "tiempo": "2030-06-08T20:25:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 42.994499999999995,
+              "pases_completados_total": 560,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 2
+            },
+            {
+              "tiempo": "2030-06-08T20:25:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 57.005500000000005,
+              "pases_completados_total": 470,
+              "tiros_intervalo": 2,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T20:30:00Z",
+              "equipo_codigo": "AAA",
+              "sede_id": "S001",
+              "posesion_pct": 42.980333333333334,
+              "pases_completados_total": 588,
+              "tiros_intervalo": 0,
+              "recuperaciones_intervalo": 5
+            },
+            {
+              "tiempo": "2030-06-08T20:30:00Z",
+              "equipo_codigo": "AAB",
+              "sede_id": "S001",
+              "posesion_pct": 57.01966666666667,
+              "pases_completados_total": 498,
+              "tiros_intervalo": 1,
+              "recuperaciones_intervalo": 2
+            }
+          ],
+          "truncado": false
+        }
+      }
+    },
+    {
+      "case": "Objeto IRIS",
+      "path": "/api/v1/objetos/partidos/P001",
+      "query": {},
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 30.33,
+      "request_id": "8793b9e1-1cdf-4691-95f1-9bc15de2195e",
+      "response": {
+        "data": {
+          "id": "1",
+          "partido_id": "P001",
+          "equipo_local": "AAA",
+          "equipo_visitante": "AAB",
+          "fecha": "2030-06-10T18:00:00",
+          "sede": "Estadio Buenos Aires",
+          "estado": "EnCurso",
+          "eventos": [
+            {
+              "id": "1||1",
+              "tipo": "Gol",
+              "minuto": 23,
+              "descripcion": "Gol del equipo local"
+            },
+            {
+              "id": "1||2",
+              "tipo": "TarjetaAmarilla",
+              "minuto": 41,
+              "descripcion": "Tarjeta amarilla al visitante"
+            }
+          ],
+          "eventos_truncados": false
+        }
+      }
+    },
+    {
+      "case": "Entrada invalida",
+      "path": "/api/v1/equipos/aa",
+      "query": {},
+      "expected": 422,
+      "actual": 422,
+      "passed": true,
+      "duration_ms": 1.1,
+      "request_id": "1f72ae67-06c9-4787-8fdb-3d88cbacac31",
+      "response": {
+        "error": {
+          "code": "entrada_invalida",
+          "message": "Revise los parametros indicados en el contrato.",
+          "request_id": "1f72ae67-06c9-4787-8fdb-3d88cbacac31",
+          "dependency": null,
+          "fields": [
+            "path.codigo"
+          ]
+        }
+      }
+    },
+    {
+      "case": "Equipo ausente",
+      "path": "/api/v1/equipos/ZZZ",
+      "query": {},
+      "expected": 404,
+      "actual": 404,
+      "passed": true,
+      "duration_ms": 1.77,
+      "request_id": "6dd4fdbd-99c3-4d52-a4a4-37c7cb76ec52",
+      "response": {
+        "error": {
+          "code": "recurso_inexistente",
+          "message": "No existe el equipo.",
+          "request_id": "6dd4fdbd-99c3-4d52-a4a4-37c7cb76ec52",
+          "dependency": null,
+          "fields": []
+        }
+      }
+    },
+    {
+      "case": "Sesion ausente",
+      "path": "/api/v1/sesiones/no-existe",
+      "query": {},
+      "expected": 404,
+      "actual": 404,
+      "passed": true,
+      "duration_ms": 0.86,
+      "request_id": "bca8d6de-4a48-47a6-95cc-41c81f9dee1b",
+      "response": {
+        "error": {
+          "code": "recurso_inexistente",
+          "message": "No existe una sesion vigente.",
+          "request_id": "bca8d6de-4a48-47a6-95cc-41c81f9dee1b",
+          "dependency": null,
+          "fields": []
+        }
+      }
+    },
+    {
+      "case": "Particion vacia",
+      "path": "/api/v1/partidos/P999999999/comentarios",
+      "query": {
+        "bucket_10m": "2030-06-10T18:00:00Z",
+        "shard": 0
+      },
+      "expected": 200,
+      "actual": 200,
+      "passed": true,
+      "duration_ms": 2.17,
+      "request_id": "5d36f7aa-630e-44ef-89c5-b039a95466b4",
+      "response": {
+        "data": {
+          "partido_id": "P999999999",
+          "bucket_10m": "2030-06-10T18:00:00Z",
+          "shard": 0,
+          "items": [],
+          "siguiente_cursor": null
+        }
+      }
+    }
+  ],
+  "health_status": 200,
+  "health": {
+    "data": {
+      "estado": "ok",
+      "dependencias": {
+        "mongodb": {
+          "estado": "ok",
+          "duracion_ms": 0.94
+        },
+        "neo4j": {
+          "estado": "ok",
+          "duracion_ms": 10.87
+        },
+        "cassandra": {
+          "estado": "ok",
+          "duracion_ms": 5.44
+        },
+        "redis": {
+          "estado": "ok",
+          "duracion_ms": 1.02
+        },
+        "influxdb": {
+          "estado": "ok",
+          "duracion_ms": 7.43
+        },
+        "iris": {
+          "estado": "ok",
+          "duracion_ms": 13.6
+        }
+      }
+    }
+  }
+}

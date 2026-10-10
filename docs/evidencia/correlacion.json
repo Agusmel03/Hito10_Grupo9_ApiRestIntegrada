@@ -1,0 +1,159 @@
+[
+  {
+    "request_id": "5072548f-7b5d-4f8b-b687-7bf2e40aafa0",
+    "dependency": "mongodb",
+    "operation": "list_teams",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 7.48
+  },
+  {
+    "request_id": "5072548f-7b5d-4f8b-b687-7bf2e40aafa0",
+    "method": "GET",
+    "route": "/api/v1/equipos",
+    "status": 200,
+    "duration_ms": 13.9
+  },
+  {
+    "request_id": "c6c7f421-03d0-42f8-adb6-5863fd84cefb",
+    "dependency": "mongodb",
+    "operation": "get_team",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 0.41
+  },
+  {
+    "request_id": "c6c7f421-03d0-42f8-adb6-5863fd84cefb",
+    "method": "GET",
+    "route": "/api/v1/equipos/{codigo}",
+    "status": 200,
+    "duration_ms": 1.02
+  },
+  {
+    "request_id": "2ad48487-9be1-4087-bde9-42298e943fc1",
+    "dependency": "neo4j",
+    "operation": "events",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 48.66
+  },
+  {
+    "request_id": "2ad48487-9be1-4087-bde9-42298e943fc1",
+    "method": "GET",
+    "route": "/api/v1/partidos/{partido_id}/eventos",
+    "status": 200,
+    "duration_ms": 50.0
+  },
+  {
+    "request_id": "a34db59a-0a9b-47d1-882b-4ee96a0ab573",
+    "dependency": "cassandra",
+    "operation": "comments",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 9.17
+  },
+  {
+    "request_id": "a34db59a-0a9b-47d1-882b-4ee96a0ab573",
+    "method": "GET",
+    "route": "/api/v1/partidos/{partido_id}/comentarios",
+    "status": 200,
+    "duration_ms": 12.02
+  },
+  {
+    "request_id": "c9d7fb1f-d74c-42b8-8be0-6c70292cc903",
+    "dependency": "redis",
+    "operation": "session",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 3.78
+  },
+  {
+    "request_id": "c9d7fb1f-d74c-42b8-8be0-6c70292cc903",
+    "method": "GET",
+    "route": "/api/v1/sesiones/{session_id}",
+    "status": 200,
+    "duration_ms": 5.35
+  },
+  {
+    "request_id": "c229f968-efb8-4d14-8652-9a3b9b2f5725",
+    "dependency": "influxdb",
+    "operation": "statistics",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 87.02
+  },
+  {
+    "request_id": "c229f968-efb8-4d14-8652-9a3b9b2f5725",
+    "method": "GET",
+    "route": "/api/v1/partidos/{partido_id}/estadisticas",
+    "status": 200,
+    "duration_ms": 88.22
+  },
+  {
+    "request_id": "8793b9e1-1cdf-4691-95f1-9bc15de2195e",
+    "dependency": "iris",
+    "operation": "match",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 28.39
+  },
+  {
+    "request_id": "8793b9e1-1cdf-4691-95f1-9bc15de2195e",
+    "method": "GET",
+    "route": "/api/v1/objetos/partidos/{partido_id}",
+    "status": 200,
+    "duration_ms": 29.39
+  },
+  {
+    "request_id": "1f72ae67-06c9-4787-8fdb-3d88cbacac31",
+    "method": "GET",
+    "route": "/api/v1/equipos/{codigo}",
+    "status": 422,
+    "duration_ms": 0.46
+  },
+  {
+    "request_id": "6dd4fdbd-99c3-4d52-a4a4-37c7cb76ec52",
+    "dependency": "mongodb",
+    "operation": "get_team",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 0.97
+  },
+  {
+    "request_id": "6dd4fdbd-99c3-4d52-a4a4-37c7cb76ec52",
+    "method": "GET",
+    "route": "/api/v1/equipos/{codigo}",
+    "status": 404,
+    "duration_ms": 1.36
+  },
+  {
+    "request_id": "bca8d6de-4a48-47a6-95cc-41c81f9dee1b",
+    "dependency": "redis",
+    "operation": "session",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 0.19
+  },
+  {
+    "request_id": "bca8d6de-4a48-47a6-95cc-41c81f9dee1b",
+    "method": "GET",
+    "route": "/api/v1/sesiones/{session_id}",
+    "status": 404,
+    "duration_ms": 0.47
+  },
+  {
+    "request_id": "5d36f7aa-630e-44ef-89c5-b039a95466b4",
+    "dependency": "cassandra",
+    "operation": "comments",
+    "result": "ok",
+    "error_type": null,
+    "duration_ms": 1.04
+  },
+  {
+    "request_id": "5d36f7aa-630e-44ef-89c5-b039a95466b4",
+    "method": "GET",
+    "route": "/api/v1/partidos/{partido_id}/comentarios",
+    "status": 200,
+    "duration_ms": 1.54
+  }
+]

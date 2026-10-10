@@ -1,0 +1,102 @@
+name: fixture2030-hito10
+services:
+  api:
+    image: fixture2030-api:hito10
+    build: .
+    env_file: .env
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    volumes:
+      - .:/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [default, influx]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  mongo:
+    image: mongo@sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3
+    command: ["mongod", "--wiredTigerCacheSizeGB", "0.25"]
+    profiles: [lab]
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "quit(db.adminCommand({ping:1}).ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  neo4j:
+    image: neo4j@sha256:dbc377fb9cd8fe8dabc19d3041b197d5ca0ef8bae514cea175b8df265e5b7a76
+    profiles: [lab]
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD:?}"
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 384m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes: [neo4j-data:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+  cassandra:
+    image: cassandra@sha256:ee178b38a2746a8e15a115bd038ad1f864391d04a84162a018cb0dd79511709a
+    profiles: [lab]
+    environment:
+      MAX_HEAP_SIZE: 512M
+      HEAP_NEWSIZE: 100M
+      CASSANDRA_CLUSTER_NAME: Fixture2030Hito10
+    volumes: [cassandra-data:/var/lib/cassandra]
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "SELECT release_version FROM system.local"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+  redis:
+    image: redis@sha256:718f745deb7dfefeac6eed7041fc7ec9476b50e61b247932682457c41adafa0e
+    profiles: [lab]
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "64mb", "--maxmemory-policy", "noeviction"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  iris:
+    image: intersystems/iris-community@sha256:cd2ebcab02d1ef80ec155def4418399f353d867162688c36a3705760e750bdaa
+    profiles: [lab]
+    init: true
+    depends_on:
+      iris-permissions:
+        condition: service_completed_successfully
+    environment:
+      ISC_DATA_DIRECTORY: /durable/iris
+      IRIS_LAB_PASSWORD: ${IRIS_PASSWORD:?}
+    volumes:
+      - iris-data:/durable
+      - ./data/iris:/src:ro
+    healthcheck:
+      test: ["CMD", "/irisHealth.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+  iris-permissions:
+    image: intersystems/iris-community@sha256:cd2ebcab02d1ef80ec155def4418399f353d867162688c36a3705760e750bdaa
+    profiles: [lab]
+    user: "0:0"
+    entrypoint: ["/bin/chown"]
+    command: ["51773:51773", "/durable"]
+    volumes: [iris-data:/durable]
+volumes:
+  mongo-data:
+  neo4j-data:
+  cassandra-data:
+  redis-data:
+  iris-data:
+networks:
+  influx:
+    external: true
+    name: hito10-influx_default

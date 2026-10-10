@@ -1,0 +1,1225 @@
+openapi: 3.1.0
+info:
+  title: Fixture 2030 - API integrada Grupo 9
+  description: Acceso por casos de uso a seis fuentes NoSQL. API local de laboratorio,
+    de solo lectura.
+  version: 1.0.0
+servers:
+- url: /
+  description: Instancia local actual
+paths:
+  /api/v1/equipos:
+    get:
+      tags:
+      - MongoDB
+      summary: Listar equipos
+      operationId: teams_api_v1_equipos_get
+      parameters:
+      - name: despues
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{3}$
+            examples:
+            - AAA
+          - type: 'null'
+          title: Despues
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 25
+          title: Limite
+      - name: confederacion
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - AFC
+            - CAF
+            - CONCACAF
+            - CONMEBOL
+            - OFC
+            - UEFA
+            type: string
+          - type: 'null'
+          title: Confederacion
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Teams_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/equipos/{codigo}:
+    get:
+      tags:
+      - MongoDB
+      summary: Obtener un equipo por codigo FIFA
+      operationId: team_api_v1_equipos__codigo__get
+      parameters:
+      - name: codigo
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Z]{3}$
+          examples:
+          - AAA
+          title: Codigo
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Team_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '404':
+          description: Recurso inexistente o sesion sin vigencia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/partidos/{partido_id}/eventos:
+    get:
+      tags:
+      - Neo4j
+      summary: Consultar eventos y protagonistas de un partido
+      operationId: events_api_v1_partidos__partido_id__eventos_get
+      parameters:
+      - name: partido_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          examples:
+          - P001
+          title: Partido Id
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 25
+          title: Limite
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          default: 0
+          title: Offset
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Events_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '404':
+          description: Recurso inexistente o sesion sin vigencia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/partidos/{partido_id}/comentarios:
+    get:
+      tags:
+      - Cassandra
+      summary: Leer una particion de comentarios
+      description: Particion completa del Hito 6. Cursor firmado, valido por una hora
+        y ligado a los parametros. Una particion vacia devuelve 200; no prueba existencia
+        del partido en otros motores.
+      operationId: comments_api_v1_partidos__partido_id__comentarios_get
+      parameters:
+      - name: partido_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          examples:
+          - P001
+          title: Partido Id
+      - name: bucket_10m
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+          examples:
+          - '2030-06-10T18:00:00Z'
+          title: Bucket 10M
+      - name: shard
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 7
+          minimum: 0
+          default: 0
+          title: Shard
+      - name: limite
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 25
+          title: Limite
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 8192
+          - type: 'null'
+          title: Cursor
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Comments_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/sesiones/{session_id}:
+    get:
+      tags:
+      - Redis
+      summary: Consultar estado y TTL de una sesion
+      description: No devuelve usuario ni tokens. No renueva el TTL. Una sesion sin
+        TTL, inactiva, ausente o expirada no es una sesion vigente.
+      operationId: session_api_v1_sesiones__session_id__get
+      parameters:
+      - name: session_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{1,80}$
+          examples:
+          - sess-demo-001
+          title: Session Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Session_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '404':
+          description: Recurso inexistente o sesion sin vigencia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/partidos/{partido_id}/estadisticas:
+    get:
+      tags:
+      - InfluxDB
+      summary: Agregar estadisticas en una ventana temporal
+      description: 'Intervalo [desde,hasta), maximo 24 horas. Posesion: mean; pases
+        acumulados: last; tiros y recuperaciones: sum. Hasta 1000 filas; truncado=true
+        requiere reducir la ventana o aumentar resolucion. tiempo es el final de la
+        ventana Flux, que puede superar hasta en una ventana parcial.'
+      operationId: statistics_api_v1_partidos__partido_id__estadisticas_get
+      parameters:
+      - name: partido_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          examples:
+          - P001
+          title: Partido Id
+      - name: desde
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+          examples:
+          - '2030-06-08T19:00:00Z'
+          title: Desde
+      - name: hasta
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+          examples:
+          - '2030-06-08T20:30:00Z'
+          title: Hasta
+      - name: equipo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            pattern: ^[A-Z]{3}$
+            examples:
+            - AAA
+          - type: 'null'
+          title: Equipo
+      - name: resolucion
+        in: query
+        required: false
+        schema:
+          enum:
+          - 1m
+          - 5m
+          - 15m
+          - 1h
+          type: string
+          default: 5m
+          title: Resolucion
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Statistics_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/objetos/partidos/{partido_id}:
+    get:
+      tags:
+      - IRIS
+      summary: Consultar un partido persistente y sus eventos hijos
+      description: Vista SQL de las clases Fixture2030.Partido y Evento del Hito 9.
+        Fecha conserva el timestamp local original sin asignarle una zona no documentada.
+      operationId: match_api_v1_objetos_partidos__partido_id__get
+      parameters:
+      - name: partido_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          examples:
+          - P001
+          title: Partido Id
+      - name: limite_eventos
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 50
+          title: Limite Eventos
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_MatchObject_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '404':
+          description: Recurso inexistente o sesion sin vigencia.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /api/v1/salud:
+    get:
+      tags:
+      - Operacion
+      summary: Comprobar conectividad real con las seis fuentes
+      operationId: health_api_v1_salud_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Health_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Una o mas dependencias no disponibles.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Health_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+  /health/live:
+    get:
+      tags:
+      - Operacion
+      summary: Verificar el proceso HTTP
+      operationId: live_health_live_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Live Health Live Get
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+components:
+  schemas:
+    Comment:
+      properties:
+        comentario_id:
+          type: string
+          format: uuid
+          title: Comentario Id
+        creado_en:
+          type: string
+          format: date-time
+          title: Creado En
+        usuario_id:
+          type: string
+          title: Usuario Id
+        contenido:
+          type: string
+          title: Contenido
+      additionalProperties: false
+      type: object
+      required:
+      - comentario_id
+      - creado_en
+      - usuario_id
+      - contenido
+      title: Comment
+    Comments:
+      properties:
+        partido_id:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          title: Partido Id
+          examples:
+          - P001
+        bucket_10m:
+          type: string
+          format: date-time
+          title: Bucket 10M
+        shard:
+          type: integer
+          title: Shard
+        items:
+          items:
+            $ref: '#/components/schemas/Comment'
+          type: array
+          title: Items
+        siguiente_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Siguiente Cursor
+      additionalProperties: false
+      type: object
+      required:
+      - partido_id
+      - bucket_10m
+      - shard
+      - items
+      - siguiente_cursor
+      title: Comments
+    DependencyStatus:
+      properties:
+        estado:
+          type: string
+          enum:
+          - ok
+          - no_disponible
+          - error
+          title: Estado
+        duracion_ms:
+          type: number
+          title: Duracion Ms
+      additionalProperties: false
+      type: object
+      required:
+      - estado
+      - duracion_ms
+      title: DependencyStatus
+    Envelope_Comments_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Comments'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Comments]
+    Envelope_Events_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Events'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Events]
+    Envelope_Health_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Health'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Health]
+    Envelope_MatchObject_:
+      properties:
+        data:
+          $ref: '#/components/schemas/MatchObject'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[MatchObject]
+    Envelope_Session_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Session'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Session]
+    Envelope_Statistics_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Statistics'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Statistics]
+    Envelope_Team_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Team'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Team]
+    Envelope_Teams_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Teams'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Teams]
+    ErrorDetail:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        request_id:
+          type: string
+          title: Request Id
+        dependency:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Dependency
+        fields:
+          items:
+            type: string
+          type: array
+          title: Fields
+          default: []
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      - request_id
+      title: ErrorDetail
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+    Events:
+      properties:
+        partido_id:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          title: Partido Id
+          examples:
+          - P001
+        items:
+          items:
+            $ref: '#/components/schemas/GraphEvent'
+          type: array
+          title: Items
+        siguiente_offset:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Siguiente Offset
+      additionalProperties: false
+      type: object
+      required:
+      - partido_id
+      - items
+      - siguiente_offset
+      title: Events
+    GraphEvent:
+      properties:
+        id_evento:
+          type: string
+          title: Id Evento
+        tipo:
+          type: string
+          title: Tipo
+        minuto:
+          type: integer
+          title: Minuto
+        descripcion:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Descripcion
+        jugador_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Jugador Id
+      additionalProperties: false
+      type: object
+      required:
+      - id_evento
+      - tipo
+      - minuto
+      title: GraphEvent
+    Health:
+      properties:
+        estado:
+          type: string
+          enum:
+          - ok
+          - degradado
+          title: Estado
+        dependencias:
+          additionalProperties:
+            $ref: '#/components/schemas/DependencyStatus'
+          type: object
+          title: Dependencias
+      additionalProperties: false
+      type: object
+      required:
+      - estado
+      - dependencias
+      title: Health
+    MatchObject:
+      properties:
+        id:
+          type: string
+          title: Id
+        partido_id:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          title: Partido Id
+          examples:
+          - P001
+        equipo_local:
+          type: string
+          title: Equipo Local
+        equipo_visitante:
+          type: string
+          title: Equipo Visitante
+        fecha:
+          type: string
+          format: date-time
+          title: Fecha
+        sede:
+          type: string
+          title: Sede
+        estado:
+          type: string
+          enum:
+          - Programado
+          - EnCurso
+          - Finalizado
+          title: Estado
+        eventos:
+          items:
+            $ref: '#/components/schemas/ObjectEvent'
+          type: array
+          title: Eventos
+        eventos_truncados:
+          type: boolean
+          title: Eventos Truncados
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - partido_id
+      - equipo_local
+      - equipo_visitante
+      - fecha
+      - sede
+      - estado
+      - eventos
+      - eventos_truncados
+      title: MatchObject
+    ObjectEvent:
+      properties:
+        id:
+          type: string
+          title: Id
+        tipo:
+          type: string
+          title: Tipo
+        minuto:
+          type: integer
+          title: Minuto
+        descripcion:
+          type: string
+          title: Descripcion
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - tipo
+      - minuto
+      - descripcion
+      title: ObjectEvent
+    Session:
+      properties:
+        session_id:
+          type: string
+          title: Session Id
+        estado:
+          type: string
+          title: Estado
+        ultima_actividad:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Ultima Actividad
+        ttl_segundos:
+          type: integer
+          minimum: 0.0
+          title: Ttl Segundos
+      additionalProperties: false
+      type: object
+      required:
+      - session_id
+      - estado
+      - ttl_segundos
+      title: Session
+    Statistics:
+      properties:
+        partido_id:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          title: Partido Id
+          examples:
+          - P001
+        desde:
+          type: string
+          format: date-time
+          title: Desde
+        hasta:
+          type: string
+          format: date-time
+          title: Hasta
+        resolucion:
+          type: string
+          title: Resolucion
+        items:
+          items:
+            $ref: '#/components/schemas/StatsPoint'
+          type: array
+          title: Items
+        truncado:
+          type: boolean
+          title: Truncado
+      additionalProperties: false
+      type: object
+      required:
+      - partido_id
+      - desde
+      - hasta
+      - resolucion
+      - items
+      - truncado
+      title: Statistics
+    StatsPoint:
+      properties:
+        tiempo:
+          type: string
+          format: date-time
+          title: Tiempo
+        equipo_codigo:
+          type: string
+          title: Equipo Codigo
+        sede_id:
+          type: string
+          title: Sede Id
+        posesion_pct:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Posesion Pct
+        pases_completados_total:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pases Completados Total
+        tiros_intervalo:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tiros Intervalo
+        recuperaciones_intervalo:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Recuperaciones Intervalo
+      additionalProperties: false
+      type: object
+      required:
+      - tiempo
+      - equipo_codigo
+      - sede_id
+      title: StatsPoint
+    Team:
+      properties:
+        id:
+          type: string
+          title: Id
+        codigo_fifa:
+          type: string
+          pattern: ^[A-Z]{3}$
+          title: Codigo Fifa
+          examples:
+          - AAA
+        nombre:
+          type: string
+          title: Nombre
+        confederacion:
+          type: string
+          enum:
+          - AFC
+          - CAF
+          - CONCACAF
+          - CONMEBOL
+          - OFC
+          - UEFA
+          title: Confederacion
+        entrenador:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entrenador
+        ranking_fifa:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Ranking Fifa
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - codigo_fifa
+      - nombre
+      - confederacion
+      title: Team
+    Teams:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Team'
+          type: array
+          title: Items
+        siguiente_codigo:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Siguiente Codigo
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - siguiente_codigo
+      title: Teams
