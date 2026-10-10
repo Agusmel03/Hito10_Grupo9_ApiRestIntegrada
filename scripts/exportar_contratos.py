@@ -7,6 +7,7 @@ import yaml
 from app.main import app
 
 EXAMPLES = [
+    ("Grafo completo del Fixture", "/api/v1/grafo", {}, 200),
     ("Equipos", "/api/v1/equipos", {"limite": 10}, 200),
     ("Equipo AAA", "/api/v1/equipos/AAA", {}, 200),
     ("Eventos P001", "/api/v1/partidos/P001/eventos", {}, 200),

@@ -27,6 +27,7 @@ No depende de los repositorios externos ni de `influxdb-hito8/`: los datos y
 clases necesarios estan incluidos en `data/`. Si esa carpeta anterior existe,
 se aprovechan sus credenciales InfluxDB para conservar el entorno previo.
 
+- Interfaz de consultas: http://localhost:8000
 - Swagger: http://localhost:8000/docs
 - Contrato HTTP: http://localhost:8000/openapi.json
 - Estado de las seis fuentes: http://localhost:8000/api/v1/salud
@@ -121,3 +122,15 @@ regenerar OpenAPI y Postman antes de ejecutar las pruebas.
 
 Nunca agregar `.env`, tokens ni volcados privados. El propietario debe otorgar
 acceso de colaboracion a los integrantes y acceso al docente segun la consigna.
+# Vistas por base de datos
+
+El panel en `http://localhost:8000` consulta la API real, en modo solo lectura:
+
+- MongoDB: documentos de equipos y paginacion por codigo FIFA.
+- Neo4j: grafo interactivo del partido, eventos y jugadores de la pagina consultada. Las relaciones `OCURRE_EN` y `PROTAGONIZADO_POR` corresponden a la consulta del adaptador; no representa todo el grafo de la base. Seleccion de nodos, propiedades, zoom y ajuste de vista.
+- Cassandra: comentarios con su particion (partido, bloque UTC y shard) y cursor.
+- Redis: estado de sesion y TTL observado, con cuenta regresiva estimada localmente. Una sesion vencida requiere una nueva consulta para confirmar su estado.
+- InfluxDB: curvas por equipo y selector de metrica, respetando valores ausentes.
+- IRIS: propiedades del objeto partido y sus eventos asociados.
+
+Las bibliotecas visuales y sus licencias estan en `app/frontend/vendor`; el navegador no necesita acceder a un CDN. Los errores de las bases se muestran sin sustituirlos por datos ficticios.

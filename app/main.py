@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 from time import perf_counter
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 
 from app.config.settings import Settings
@@ -90,6 +92,12 @@ def create_app(settings=None, adapters=None):
             request_id.reset(context_token)
 
     app.include_router(router)
+    frontend = Path(__file__).resolve().parent / "frontend"
+    app.mount("/ui", StaticFiles(directory=frontend), name="ui")
+
+    @app.get("/", include_in_schema=False)
+    def dashboard():
+        return FileResponse(frontend / "index.html")
 
     @app.get("/health/live", tags=["Operacion"], summary="Verificar el proceso HTTP")
     def live() -> dict[str, str]:

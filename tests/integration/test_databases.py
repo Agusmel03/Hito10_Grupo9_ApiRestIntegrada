@@ -19,6 +19,7 @@ def live_client():
 
 
 @pytest.mark.parametrize("url,key", [
+    ("/api/v1/grafo", "nodos"),
     ("/api/v1/equipos/AAA", "codigo_fifa"),
     ("/api/v1/partidos/P001/eventos", "items"),
     ("/api/v1/partidos/P001/comentarios?bucket_10m=2030-06-10T18:00:00Z&shard=0", "items"),
@@ -52,6 +53,21 @@ def test_real_cassandra_pagination(live_client):
             break
         params["cursor"] = data["siguiente_cursor"]
     assert len(ids) == len(set(ids)) == 30
+
+
+def test_complete_lab_graph(live_client):
+    response = live_client.get("/api/v1/grafo")
+    assert response.status_code == 200, response.text
+    data = response.json()["data"]
+    assert data["truncado"] is False
+    assert len(data["nodos"]) == data["total_nodos"]
+    assert {n["tipo"] for n in data["nodos"]} == {"Partido", "Equipo", "Jugador", "Sede", "Evento"}
+    ids = {n["id"] for n in data["nodos"]}
+    assert len(ids) == len(data["nodos"])
+    assert all(r["origen"] in ids and r["destino"] in ids for r in data["relaciones"])
+    assert {r["tipo"] for r in data["relaciones"]} == {"PARTICIPA_EN", "SE_JUEGA_EN", "PERTENECE_A", "OCURRE_EN", "PROTAGONIZADO_POR"}
+    player = next(n for n in data["nodos"] if n["tipo"] == "Jugador")
+    assert "club" in player["propiedades"]
 
 
 def test_real_mongo_keyset(live_client):

@@ -27,6 +27,9 @@ class FixtureService:
         return {"partido_id": match_id, "items": rows[:limit],
                 "siguiente_offset": offset+limit if len(rows) > limit and offset+limit <= 10000 else None}
 
+    def graph(self):
+        return self.adapters["neo4j"].graph()
+
     def comments(self, match_id, query):
         partition = [match_id, query.bucket_10m.isoformat(), query.shard, query.limite]
         state = self.cursors.decode(query.cursor, partition)

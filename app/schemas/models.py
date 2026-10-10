@@ -47,6 +47,27 @@ class Events(Model):
     siguiente_offset: int | None
 
 
+class GraphNode(Model):
+    id: str
+    tipo: str
+    propiedades: dict[str, str | int | float | bool | None]
+
+
+class GraphRelation(Model):
+    id: str
+    origen: str
+    destino: str
+    tipo: str
+    propiedades: dict[str, str | int | float | bool | None]
+
+
+class Graph(Model):
+    nodos: list[GraphNode]
+    relaciones: list[GraphRelation]
+    total_nodos: int
+    truncado: bool
+
+
 class Comment(Model):
     comentario_id: UUID
     creado_en: datetime

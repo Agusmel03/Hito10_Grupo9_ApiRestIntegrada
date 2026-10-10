@@ -30,6 +30,29 @@ class Neo4jAdapter:
             return [record.data() for record in session.run(query, id=match_id, offset=offset, limit=limit+1)]
 
     @guarded("neo4j", (DriverError, Neo4jError))
+    def graph(self):
+        labels = ["Partido", "Equipo", "Jugador", "Evento", "Sede"]
+        fields = ["id_partido", "mongo_id", "id_evento", "id_sede", "nombre", "apellido",
+                  "codigo_fifa", "confederacion", "entrenador", "ranking_fifa", "fecha",
+                  "fase", "grupo", "tipo", "minuto", "descripcion", "ciudad", "pais",
+                  "capacidad", "fecha_nacimiento", "posicion", "numero_camiseta", "club", "equipo_id"]
+        def properties(node):
+            return {key: value if isinstance(value, (str, int, float, bool)) or value is None else str(value)
+                    for key, value in node.items() if key in fields or key == "rol"}
+        with self.driver.session(database=self.settings.neo4j_database) as session:
+            with session.begin_transaction(timeout=self.settings.timeout_seconds) as tx:
+                total = tx.run("MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels) RETURN count(n) AS total", labels=labels).single()["total"]
+                records = list(tx.run("MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels) RETURN n ORDER BY elementId(n) LIMIT 5000", labels=labels))
+                nodes = [{"id": r["n"].element_id, "tipo": next(l for l in labels if l in r["n"].labels), "propiedades": properties(r["n"])} for r in records]
+                ids = [n["id"] for n in nodes]
+                relations = list(tx.run("""MATCH (a)-[r]->(b) WHERE elementId(a) IN $ids AND elementId(b) IN $ids
+                    AND type(r) IN $types RETURN r, elementId(a) AS origen, elementId(b) AS destino
+                    ORDER BY elementId(r) LIMIT 15001""", ids=ids,
+                    types=["OCURRE_EN", "PROTAGONIZADO_POR", "PARTICIPA_EN", "SE_JUEGA_EN", "PERTENECE_A"]))
+                return {"nodos": nodes, "relaciones": [{"id": r["r"].element_id, "origen": r["origen"], "destino": r["destino"], "tipo": r["r"].type, "propiedades": properties(r["r"])} for r in relations[:15000]],
+                        "total_nodos": total, "truncado": total > len(nodes) or len(relations) > 15000}
+
+    @guarded("neo4j", (DriverError, Neo4jError))
     def ping(self):
         with self.driver.session(database=self.settings.neo4j_database) as session:
             session.run(Query("RETURN 1", timeout=self.settings.timeout_seconds)).consume()

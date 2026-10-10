@@ -7,7 +7,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.schemas.models import (Code, CommentQuery, Comments, Confederation, Envelope,
     ErrorResponse, Events, Health, MatchID, MatchObject, Session, SessionID,
-    Statistics, StatsQuery, Team, Teams)
+    Statistics, StatsQuery, Team, Teams, Graph)
 
 router = APIRouter(prefix="/api/v1", responses={
     422: {"model": ErrorResponse, "description": "Entrada invalida; no se consulta la fuente."},
@@ -19,6 +19,13 @@ absent = {404: {"model": ErrorResponse, "description": "Recurso inexistente o se
 
 def service(request: Request):
     return request.app.state.service
+
+
+@router.get("/grafo", tags=["Neo4j"], response_model=Envelope[Graph],
+            summary="Explorar nodos y relaciones del Fixture",
+            description="Instantanea de solo lectura: hasta 5000 nodos y 15000 relaciones del dominio. Propiedades publicas permitidas; truncado indica limites alcanzados. IDs internos validos solo para esta instantanea.")
+def graph(svc=Depends(service)):
+    return {"data": svc.graph()}
 
 
 @router.get("/equipos", tags=["MongoDB"], response_model=Envelope[Teams], summary="Listar equipos")

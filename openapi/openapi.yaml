@@ -8,6 +8,64 @@ servers:
 - url: /
   description: Instancia local actual
 paths:
+  /api/v1/grafo:
+    get:
+      tags:
+      - Neo4j
+      summary: Explorar nodos y relaciones del Fixture
+      description: 'Instantanea de solo lectura: hasta 5000 nodos y 15000 relaciones
+        del dominio. Propiedades publicas permitidas; truncado indica limites alcanzados.
+        IDs internos validos solo para esta instantanea.'
+      operationId: graph_api_v1_grafo_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Graph_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
   /api/v1/equipos:
     get:
       tags:
@@ -825,6 +883,15 @@ components:
       required:
       - data
       title: Envelope[Events]
+    Envelope_Graph_:
+      properties:
+        data:
+          $ref: '#/components/schemas/Graph'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[Graph]
     Envelope_Health_:
       properties:
         data:
@@ -942,6 +1009,32 @@ components:
       - items
       - siguiente_offset
       title: Events
+    Graph:
+      properties:
+        nodos:
+          items:
+            $ref: '#/components/schemas/GraphNode'
+          type: array
+          title: Nodos
+        relaciones:
+          items:
+            $ref: '#/components/schemas/GraphRelation'
+          type: array
+          title: Relaciones
+        total_nodos:
+          type: integer
+          title: Total Nodos
+        truncado:
+          type: boolean
+          title: Truncado
+      additionalProperties: false
+      type: object
+      required:
+      - nodos
+      - relaciones
+      - total_nodos
+      - truncado
+      title: Graph
     GraphEvent:
       properties:
         id_evento:
@@ -970,6 +1063,64 @@ components:
       - tipo
       - minuto
       title: GraphEvent
+    GraphNode:
+      properties:
+        id:
+          type: string
+          title: Id
+        tipo:
+          type: string
+          title: Tipo
+        propiedades:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Propiedades
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - tipo
+      - propiedades
+      title: GraphNode
+    GraphRelation:
+      properties:
+        id:
+          type: string
+          title: Id
+        origen:
+          type: string
+          title: Origen
+        destino:
+          type: string
+          title: Destino
+        tipo:
+          type: string
+          title: Tipo
+        propiedades:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: boolean
+            - type: 'null'
+          type: object
+          title: Propiedades
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - origen
+      - destino
+      - tipo
+      - propiedades
+      title: GraphRelation
     Health:
       properties:
         estado:

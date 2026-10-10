@@ -35,12 +35,23 @@ def mongo(settings):
 def neo4j(settings):
     with GraphDatabase.driver(settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password.get_secret_value())) as driver:
         with driver.session(database=settings.neo4j_database) as session:
-            for label, field in [("Partido", "id_partido"), ("Evento", "id_evento"), ("Jugador", "mongo_id")]:
+            for label, field in [("Partido", "id_partido"), ("Evento", "id_evento"), ("Jugador", "mongo_id"), ("Equipo", "mongo_id"), ("Sede", "id_sede")]:
                 session.run(f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:{label}) REQUIRE n.{field} IS UNIQUE").consume()
             session.run("""UNWIND $rows AS row MERGE (p:Partido {id_partido:row.id_partido})
                 SET p.fecha=localdatetime(row.fecha), p.fase=row.fase, p.grupo=row.grupo""", rows=rows("partidos")).consume()
             session.run("""UNWIND $rows AS row MERGE (j:Jugador {mongo_id:row.mongo_id})
-                SET j.nombre=row.nombre, j.apellido=row.apellido""", rows=rows("jugadores")).consume()
+                SET j += row""", rows=rows("jugadores")).consume()
+            session.run("""UNWIND $rows AS row MERGE (e:Equipo {mongo_id:row.mongo_id})
+                SET e += row, e.ranking_fifa=toInteger(row.ranking_fifa)""", rows=rows("equipos")).consume()
+            session.run("""UNWIND $rows AS row MERGE (s:Sede {id_sede:row.id_sede})
+                SET s += row, s.capacidad=toInteger(row.capacidad)""", rows=rows("sedes")).consume()
+            session.run("""UNWIND $rows AS row MATCH (p:Partido {id_partido:row.id_partido})
+                MATCH (a:Equipo {mongo_id:row.equipo_local_id}), (b:Equipo {mongo_id:row.equipo_visitante_id}), (s:Sede {id_sede:row.sede_id})
+                MERGE (a)-[:PARTICIPA_EN {rol:'LOCAL'}]->(p)
+                MERGE (b)-[:PARTICIPA_EN {rol:'VISITANTE'}]->(p)
+                MERGE (p)-[:SE_JUEGA_EN]->(s)""", rows=rows("partidos")).consume()
+            session.run("""MATCH (j:Jugador), (e:Equipo) WHERE j.equipo_id=e.mongo_id
+                MERGE (j)-[:PERTENECE_A]->(e)""").consume()
             session.run("""UNWIND $rows AS row
                 MATCH (p:Partido {id_partido:row.partido_id})
                 MATCH (j:Jugador {mongo_id:row.jugador_id})
