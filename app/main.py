@@ -6,12 +6,14 @@ from uuid import UUID, uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 
 from app.config.settings import Settings
 from app.errors import ApiError
+from app.metrics import HTTP_LATENCY
 from app.observability import emit, request_id
 from app.routes.api import router
 from app.schemas.models import ErrorResponse
@@ -45,7 +47,7 @@ def create_app(settings=None, adapters=None):
                 emit(operation="close", dependency=name, error_type=type(exc).__name__)
 
     app = FastAPI(title="Fixture 2030 - API integrada Grupo 9", version="1.0.0",
-        description="Acceso por casos de uso a seis fuentes NoSQL. API local de laboratorio, de solo lectura.",
+        description="Acceso por casos de uso a seis fuentes NoSQL. API local de laboratorio: lecturas en las seis fuentes y alta de comentarios en Cassandra.",
         lifespan=lifespan, servers=[{"url": "/", "description": "Instancia local actual"}])
 
     def error_response(request, status, code, message, dependency=None, fields=None):
@@ -85,8 +87,12 @@ def create_app(settings=None, adapters=None):
             response.headers["X-Request-ID"] = rid
             response.headers["Cache-Control"] = "no-store"
             route = request.scope.get("route")
-            emit(method=request.method, route=getattr(route, "path", "unmatched"),
-                 status=response.status_code, duration_ms=round((perf_counter()-start)*1000, 2))
+            path = getattr(route, "path", "unmatched")
+            elapsed = perf_counter()-start
+            if path != "/metrics":
+                HTTP_LATENCY.labels(request.method, path, str(response.status_code)).observe(elapsed)
+            emit(method=request.method, route=path,
+                 status=response.status_code, duration_ms=round(elapsed*1000, 2))
             return response
         finally:
             request_id.reset(context_token)
@@ -98,6 +104,10 @@ def create_app(settings=None, adapters=None):
     @app.get("/", include_in_schema=False)
     def dashboard():
         return FileResponse(frontend / "index.html")
+
+    @app.get("/metrics", include_in_schema=False)
+    def metrics():
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     @app.get("/health/live", tags=["Operacion"], summary="Verificar el proceso HTTP")
     def live() -> dict[str, str]:

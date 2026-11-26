@@ -9,6 +9,7 @@ redis==6.0.0
 influxdb-client==1.48.0
 intersystems-irispython==5.3.2
 httpx==0.28.1
+prometheus-client==0.22.1
 pytest==8.3.5
 PyYAML==6.0.2
 jsonschema==4.23.0

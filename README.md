@@ -99,8 +99,9 @@ Regenerar junto con Postman mediante:
 docker compose run --rm api python -m scripts.exportar_contratos
 ```
 
-Alcance: lecturas idempotentes sobre las seis fuentes; no hay operaciones de
-escritura HTTP ni transiciones de estado. Los scripts de carga son herramientas
+Alcance: lecturas idempotentes sobre las seis fuentes y una escritura HTTP:
+`POST /api/v1/partidos/{partido_id}/comentarios` publica un comentario en
+Cassandra (ver `docs/casos_de_uso.md`). No hay transiciones de estado. Los scripts de carga son herramientas
 del laboratorio. No se ofrecen autenticacion de consumidores, alta disponibilidad,
 consistencia distribuida ni garantias de produccion. La API se publica solo en
 localhost. Los motores sin autenticacion estan limitados a la red Docker local.

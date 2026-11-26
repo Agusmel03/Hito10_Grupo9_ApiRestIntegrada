@@ -83,6 +83,21 @@ class Comments(Model):
     siguiente_cursor: str | None
 
 
+class NewComment(Model):
+    usuario_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,40}$", examples=["USR002"])
+    contenido: str = Field(min_length=1, max_length=500, examples=["Que golazo!"])
+
+
+class CreatedComment(Model):
+    comentario_id: UUID
+    partido_id: MatchID
+    bucket_10m: AwareDatetime
+    shard: int
+    creado_en: AwareDatetime
+    usuario_id: str
+    contenido: str
+
+
 class CommentQuery(Model):
     bucket_10m: AwareDatetime = Field(examples=["2030-06-10T18:00:00Z"])
     shard: int = Field(ge=0, le=7, default=0)
