@@ -61,6 +61,9 @@ def neo4j(settings):
             print("Neo4j: partidos, jugadores y eventos originales cargados.")
 
 
+SHARDS = 8
+
+
 def cassandra(settings):
     cluster = Cluster([settings.cassandra_host], port=settings.cassandra_port, connect_timeout=5)
     try:
@@ -80,13 +83,19 @@ def cassandra(settings):
         by_match = session.prepare("INSERT INTO comentarios_por_partido (partido_id,bucket_10m,shard,creado_en,comentario_id,usuario_id,contenido) VALUES (?,?,?,?,?,?,?)")
         by_user = session.prepare("INSERT INTO comentarios_por_usuario (usuario_id,mes_bucket,creado_en,comentario_id,partido_id,contenido) VALUES (?,?,?,?,?,?)")
         bucket = datetime(2030, 6, 10, 18, tzinfo=timezone.utc)
+        # Siembra idempotente: se vacian las 8 particiones del bloque antes de cargar.
+        clear = session.prepare("DELETE FROM comentarios_por_partido WHERE partido_id=? AND bucket_10m=? AND shard=?")
+        for shard in range(SHARDS):
+            session.execute(clear, ("P001", bucket, shard))
         for i in range(30):
+            number = i+1
             when = bucket+timedelta(seconds=i*5)
-            cid = UUID(int=i+1)
-            content = f"Comentario de laboratorio {i+1} del Fixture 2030"
-            session.execute(by_match, ("P001", bucket, 0, when, cid, "USR001", content))
+            cid = UUID(int=number)
+            shard = number % SHARDS  # resto de dividir el numero de comentario por 8
+            content = f"Comentario de laboratorio {number} del Fixture 2030"
+            session.execute(by_match, ("P001", bucket, shard, when, cid, "USR001", content))
             session.execute(by_user, ("USR001", "2030-06", when, cid, "P001", content))
-        print("Cassandra: 30 comentarios, misma identidad en ambas tablas.")
+        print(f"Cassandra: 30 comentarios repartidos en {SHARDS} shards, misma identidad en ambas tablas.")
     finally:
         cluster.shutdown()
 

@@ -1,5 +1,6 @@
 import os
 import time
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,17 +42,22 @@ def test_real_source_and_schema(live_client, url, key):
 
 def test_real_cassandra_pagination(live_client):
     path = "/api/v1/partidos/P001/comentarios"
-    params = {"bucket_10m": "2030-06-10T18:00:00Z", "shard": 0, "limite": 7}
     ids = []
-    for _ in range(10):
-        response = live_client.get(path, params=params)
-        assert response.status_code == 200, response.text
-        data = response.json()["data"]
-        assert len(data["items"]) <= 7
-        ids.extend(row["comentario_id"] for row in data["items"])
-        if not data["siguiente_cursor"]:
-            break
-        params["cursor"] = data["siguiente_cursor"]
+    for shard in range(8):
+        params = {"bucket_10m": "2030-06-10T18:00:00Z", "shard": shard, "limite": 2}
+        shard_ids = []
+        for _ in range(10):
+            response = live_client.get(path, params=params)
+            assert response.status_code == 200, response.text
+            data = response.json()["data"]
+            assert data["shard"] == shard and len(data["items"]) <= 2
+            shard_ids.extend(row["comentario_id"] for row in data["items"])
+            if not data["siguiente_cursor"]:
+                break
+            params["cursor"] = data["siguiente_cursor"]
+        # Cada comentario esta en el shard que indica el resto de dividir su numero por 8.
+        assert all(UUID(cid).int % 8 == shard for cid in shard_ids)
+        ids.extend(shard_ids)
     assert len(ids) == len(set(ids)) == 30
 
 
