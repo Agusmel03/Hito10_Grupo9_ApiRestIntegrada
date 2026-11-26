@@ -20,6 +20,13 @@ class RedisAdapter:
                 "ultima_actividad": values.get("ultima_actividad"), "ttl_segundos": ttl}
 
     @guarded("redis", RedisError)
+    def create_session(self, session_id, fields, ttl):
+        key = f"fixture2030:session:{session_id}"
+        # HSET y EXPIRE en una transaccion: la sesion nunca queda sin vencimiento.
+        with self.client.pipeline(transaction=True) as pipe:
+            pipe.hset(key, mapping=fields).expire(key, ttl).execute()
+
+    @guarded("redis", RedisError)
     def ping(self):
         self.client.ping()
 

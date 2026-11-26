@@ -10,11 +10,12 @@ que consulta Swagger. API local de laboratorio, sin datos personales reales.
 | Eventos de partido | ID, limite, offset acotado | Neo4j; Partido <- OCURRE_EN - Evento | eventos y protagonistas, 200 | partido 404; sin eventos 200 | 503 |
 | Comentarios por particion | partido, bucket de 10 minutos, shard, cursor | Cassandra; clave de particion completa | pagina y cursor, 200 | particion vacia, 200 | 503 |
 | Consultar sesion | identificador | Redis; hash fixture2030:session:* | estado y TTL vigente, 200 | ausente/expirada, 404 | 503 |
+| Crear sesion | usuario y origen (web/app) en el cuerpo | Redis; HSET + EXPIRE 1800 s en transaccion | estado y TTL, 201 | no aplica | 503 |
 | Estadisticas por ventana | partido, equipo opcional, desde, hasta, resolucion | InfluxDB; Flux acotado por tags y tiempo | agregaciones por field, 200 | sin puntos, 200 | 503 |
 | Publicar comentario | partido; usuario y contenido en el cuerpo | Cassandra; LOGGED BATCH en comentarios_por_partido y comentarios_por_usuario | comentario con bloque y shard, 201 | no aplica | 503 |
 | Detalle de objeto partido | PartidoID, limite de eventos | IRIS; indice unico y relacion padre-hijo | objeto publico con eventos, 200 | 404 | 503 |
 
-La API implementa lectura en las seis fuentes y una escritura en Cassandra.
+La API implementa lectura en las seis fuentes y dos escrituras: comentarios en Cassandra y sesiones en Redis.
 El POST de comentarios escribe las dos tablas desnormalizadas en un LOGGED BATCH:
 Cassandra garantiza que ambas inserciones se aplican o ninguna, aunque no de forma
 aislada (un lector puede ver una tabla actualizada un instante antes que la otra).
@@ -23,7 +24,7 @@ minutos UTC del instante de creacion y shard el resto de dividir comentario_id
 (un UUID, numero de 128 bits) por 8. No se valida la existencia del partido en
 otros motores.
 La consigna permite lecturas y escrituras cuando correspondan al caso de uso.
-Todos los GET son idempotentes y no renuevan TTL ni modifican datos. El POST no es idempotente: cada llamada crea un comentario nuevo.
+Todos los GET son idempotentes y no renuevan TTL ni modifican datos. Los POST no son idempotentes: cada llamada crea un comentario o una sesion nueva. Crear una sesion no renueva otras.
 No hay transiciones IRIS ni conflicto de escritura 409 en este contrato.
 
 No se exige consistencia global entre motores: P001 tiene fechas diferentes

@@ -119,6 +119,11 @@ class Session(Model):
     ttl_segundos: int = Field(ge=0)
 
 
+class NewSession(Model):
+    usuario_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,40}$", examples=["USR000002"])
+    origen: Literal["web", "app"] = "web"
+
+
 class StatsQuery(Model):
     desde: AwareDatetime = Field(examples=["2030-06-08T19:00:00Z"])
     hasta: AwareDatetime = Field(examples=["2030-06-08T20:30:00Z"])
