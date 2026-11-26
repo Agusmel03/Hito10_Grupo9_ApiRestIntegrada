@@ -157,3 +157,24 @@ def test_metrics_measure_comment_latency_without_private_data(client, adapters):
     assert 'route="/api/v1/partidos/{partido_id}/comentarios"' in body
     assert "USR-PRIVADO" not in body and "texto privado" not in body
     assert 'route="/metrics"' not in body
+
+
+def test_create_session_sets_ttl_and_hides_user(client, adapters):
+    response = client.post("/api/v1/sesiones", json={"usuario_id": "USR000002", "origen": "app"})
+    assert response.status_code == 201, response.text
+    data = response.json()["data"]
+    session_id, fields, ttl = adapters["redis"].create_session.call_args.args
+    assert data["session_id"] == session_id and session_id.startswith("sess-")
+    assert data["ttl_segundos"] == ttl == 1800 and data["estado"] == fields["estado"] == "activa"
+    assert fields["usuario_id"] == "USR000002" and "USR000002" not in response.text
+
+
+@pytest.mark.parametrize("body", [{"usuario_id": "USR 2"}, {"usuario_id": "USR2", "origen": "tv"}, {}])
+def test_create_session_invalid_never_writes(client, adapters, body):
+    assert client.post("/api/v1/sesiones", json=body).status_code == 422
+    assert not adapters["redis"].create_session.called
+
+
+def test_create_session_unavailable_is_503(client, adapters):
+    adapters["redis"].create_session.side_effect = unavailable("redis")
+    assert client.post("/api/v1/sesiones", json={"usuario_id": "USR2"}).status_code == 503

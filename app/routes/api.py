@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from app.schemas.models import (Code, CommentQuery, Comments, Confederation, CreatedComment, Envelope, NewComment,
+from app.schemas.models import (Code, CommentQuery, Comments, Confederation, CreatedComment, Envelope, NewComment, NewSession,
     ErrorResponse, Events, Health, MatchID, MatchObject, Session, SessionID,
     Statistics, StatsQuery, Team, Teams, Graph)
 
@@ -58,6 +58,13 @@ def comments(partido_id: MatchID, query: Annotated[CommentQuery, Query()], svc=D
              description="Escribe el comentario en comentarios_por_partido y comentarios_por_usuario con un LOGGED BATCH: ambas tablas lo reciben o ninguna. bucket_10m es el bloque de 10 minutos UTC del instante de creacion y shard el resto de dividir comentario_id por 8. No valida la existencia del partido en otros motores.")
 def add_comment(partido_id: MatchID, body: NewComment, svc=Depends(service)):
     return {"data": svc.add_comment(partido_id, body)}
+
+
+@router.post("/sesiones", tags=["Redis"], status_code=201, response_model=Envelope[Session],
+             summary="Crear una sesion",
+             description="Crea fixture2030:session:{id} con HSET y EXPIRE en una transaccion: TTL de 1800 segundos. El ID es aleatorio. No devuelve usuario ni origen, igual que la consulta.")
+def create_session(body: NewSession, svc=Depends(service)):
+    return {"data": svc.create_session(body)}
 
 
 @router.get("/sesiones/{session_id}", tags=["Redis"], response_model=Envelope[Session], responses=absent,

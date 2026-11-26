@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from secrets import token_hex
 from uuid import uuid4
 from time import perf_counter
 
@@ -8,6 +9,7 @@ from app.services.cursors import CursorCodec
 
 
 SHARDS = 8
+SESSION_TTL = 1800  # 30 minutos, igual que la sesion de muestra
 
 
 class FixtureService:
@@ -66,6 +68,15 @@ class FixtureService:
             COMMENT_WRITE.labels(result).observe(perf_counter()-start)
         return {key: comment[key] for key in
                 ["comentario_id", "partido_id", "bucket_10m", "shard", "creado_en", "usuario_id", "contenido"]}
+
+    def create_session(self, new):
+        session_id = f"sess-{token_hex(8)}"
+        now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.adapters["redis"].create_session(session_id, {
+            "session_id": session_id, "usuario_id": new.usuario_id, "estado": "activa",
+            "ultima_actividad": now, "origen": new.origen}, SESSION_TTL)
+        # Como el GET: no devuelve usuario ni origen.
+        return {"session_id": session_id, "estado": "activa", "ultima_actividad": now, "ttl_segundos": SESSION_TTL}
 
     def session(self, session_id):
         result = self.adapters["redis"].session(session_id)

@@ -507,6 +507,70 @@ paths:
               schema:
                 type: string
                 format: uuid
+  /api/v1/sesiones:
+    post:
+      tags:
+      - Redis
+      summary: Crear una sesion
+      description: 'Crea fixture2030:session:{id} con HSET y EXPIRE en una transaccion:
+        TTL de 1800 segundos. El ID es aleatorio. No devuelve usuario ni origen, igual
+        que la consulta.'
+      operationId: create_session_api_v1_sesiones_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewSession'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_Session_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
   /api/v1/sesiones/{session_id}:
     get:
       tags:
@@ -1336,6 +1400,26 @@ components:
       - usuario_id
       - contenido
       title: NewComment
+    NewSession:
+      properties:
+        usuario_id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{1,40}$
+          title: Usuario Id
+          examples:
+          - USR000002
+        origen:
+          type: string
+          enum:
+          - web
+          - app
+          title: Origen
+          default: web
+      additionalProperties: false
+      type: object
+      required:
+      - usuario_id
+      title: NewSession
     ObjectEvent:
       properties:
         id:

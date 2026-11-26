@@ -129,6 +129,23 @@ def test_redis_real_expiration(live_client):
         redis.close()
 
 
+def test_real_create_session_is_readable_with_ttl(live_client):
+    s = Settings()
+    if s.redis_url.get_secret_value() != "redis://redis:6379/0":
+        pytest.skip("La prueba con escritura solo se permite en Redis del laboratorio")
+    created = live_client.post("/api/v1/sesiones", json={"usuario_id": "USR-TEST"})
+    assert created.status_code == 201, created.text
+    session_id = created.json()["data"]["session_id"]
+    redis = Redis.from_url(s.redis_url.get_secret_value())
+    try:
+        read = live_client.get(f"/api/v1/sesiones/{session_id}")
+        assert read.status_code == 200, read.text
+        assert 1790 <= read.json()["data"]["ttl_segundos"] <= 1800
+    finally:
+        redis.delete(f"fixture2030:session:{session_id}")
+        redis.close()
+
+
 @pytest.mark.parametrize("source,overrides,path", [
     ("mongodb", {"mongo_uri": "mongodb://127.0.0.1:1"}, "/api/v1/equipos/AAA"),
     ("neo4j", {"neo4j_uri": "bolt://127.0.0.1:1"}, "/api/v1/partidos/P001/eventos"),
