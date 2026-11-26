@@ -20,7 +20,7 @@ Respuesta exitosa: `{"data": ...}`. Respuesta de error:
 `/api/v1/salud` es una excepcion documentada al esquema de error: usa el mismo
 objeto de estado por fuente tanto con 200 como con 503 (estado degradado).
 `/health/live` solo verifica el proceso; no afirma que las bases esten disponibles.
-No hay 409 porque no se implementan escrituras ni conflictos de transicion.
+No hay 409: la unica escritura (POST de comentarios) siempre crea un comentario nuevo con UUID propio, sin conflictos de transicion.
 
 Reglas de entrada y limites:
 

@@ -117,3 +117,43 @@ def test_unknown_route_and_method_have_common_error(client):
     for response in [client.get("/not-found"), client.post("/api/v1/equipos", json={})]:
         assert response.status_code in [404, 405]
         assert response.json()["error"]["request_id"] == response.headers["X-Request-ID"]
+
+
+def test_post_comment_writes_partition_and_shard(client, adapters):
+    response = client.post("/api/v1/partidos/P001/comentarios", json={"usuario_id": "USR002", "contenido": "Golazo"})
+    assert response.status_code == 201, response.text
+    data = response.json()["data"]
+    stored = adapters["cassandra"].add_comment.call_args.args[0]
+    assert UUID(data["comentario_id"]) == stored["comentario_id"]
+    assert data["shard"] == stored["comentario_id"].int % 8
+    assert stored["bucket_10m"].minute % 10 == 0 and stored["bucket_10m"].second == 0
+    assert stored["bucket_10m"] <= stored["creado_en"] and stored["mes_bucket"] == stored["creado_en"].strftime("%Y-%m")
+
+
+@pytest.mark.parametrize("url,body", [
+    ("/api/v1/partidos/P001/comentarios", {"usuario_id": "USR002", "contenido": ""}),
+    ("/api/v1/partidos/P001/comentarios", {"usuario_id": "USR 002", "contenido": "x"}),
+    ("/api/v1/partidos/P001/comentarios", {"usuario_id": "USR002", "contenido": "x"*501}),
+    ("/api/v1/partidos/P001/comentarios", {"usuario_id": "USR002", "contenido": "x", "shard": 3}),
+    ("/api/v1/partidos/invalido/comentarios", {"usuario_id": "USR002", "contenido": "x"}),
+])
+def test_post_comment_invalid_never_writes(client, adapters, url, body):
+    response = client.post(url, json=body)
+    assert response.status_code == 422
+    assert not adapters["cassandra"].add_comment.called
+
+
+def test_post_comment_unavailable_is_503(client, adapters):
+    adapters["cassandra"].add_comment.side_effect = unavailable("cassandra")
+    response = client.post("/api/v1/partidos/P001/comentarios", json={"usuario_id": "USR002", "contenido": "x"})
+    assert response.status_code == 503
+    assert response.json()["error"]["dependency"] == "cassandra"
+
+
+def test_metrics_measure_comment_latency_without_private_data(client, adapters):
+    client.post("/api/v1/partidos/P001/comentarios", json={"usuario_id": "USR-PRIVADO", "contenido": "texto privado"})
+    body = client.get("/metrics").text
+    assert 'fixture2030_comentario_escritura_segundos_count{result="ok"}' in body
+    assert 'route="/api/v1/partidos/{partido_id}/comentarios"' in body
+    assert "USR-PRIVADO" not in body and "texto privado" not in body
+    assert 'route="/metrics"' not in body

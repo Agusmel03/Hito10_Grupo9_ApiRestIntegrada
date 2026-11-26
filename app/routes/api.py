@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from app.schemas.models import (Code, CommentQuery, Comments, Confederation, Envelope,
+from app.schemas.models import (Code, CommentQuery, Comments, Confederation, CreatedComment, Envelope, NewComment,
     ErrorResponse, Events, Health, MatchID, MatchObject, Session, SessionID,
     Statistics, StatsQuery, Team, Teams, Graph)
 
@@ -51,6 +51,13 @@ def events(partido_id: MatchID, svc=Depends(service), limite: int = Query(25, ge
             summary="Leer una particion de comentarios", description="Particion completa del Hito 6. Cursor firmado, valido por una hora y ligado a los parametros. Una particion vacia devuelve 200; no prueba existencia del partido en otros motores.")
 def comments(partido_id: MatchID, query: Annotated[CommentQuery, Query()], svc=Depends(service)):
     return {"data": svc.comments(partido_id, query)}
+
+
+@router.post("/partidos/{partido_id}/comentarios", tags=["Cassandra"], status_code=201,
+             response_model=Envelope[CreatedComment], summary="Publicar un comentario",
+             description="Escribe el comentario en comentarios_por_partido y comentarios_por_usuario con un LOGGED BATCH: ambas tablas lo reciben o ninguna. bucket_10m es el bloque de 10 minutos UTC del instante de creacion y shard el resto de dividir comentario_id por 8. No valida la existencia del partido en otros motores.")
+def add_comment(partido_id: MatchID, body: NewComment, svc=Depends(service)):
+    return {"data": svc.add_comment(partido_id, body)}
 
 
 @router.get("/sesiones/{session_id}", tags=["Redis"], response_model=Envelope[Session], responses=absent,

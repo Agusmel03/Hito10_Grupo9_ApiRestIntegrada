@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Fixture 2030 - API integrada Grupo 9
-  description: Acceso por casos de uso a seis fuentes NoSQL. API local de laboratorio,
-    de solo lectura.
+  description: 'Acceso por casos de uso a seis fuentes NoSQL. API local de laboratorio:
+    lecturas en las seis fuentes y alta de comentarios en Cassandra.'
   version: 1.0.0
 servers:
 - url: /
@@ -391,6 +391,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope_Comments_'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '422':
+          description: Entrada invalida; no se consulta la fuente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '503':
+          description: Dependencia inaccesible o timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+        '500':
+          description: Error interno seguro.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            X-Request-ID:
+              description: UUID de correlacion de la request y sus logs.
+              schema:
+                type: string
+                format: uuid
+    post:
+      tags:
+      - Cassandra
+      summary: Publicar un comentario
+      description: 'Escribe el comentario en comentarios_por_partido y comentarios_por_usuario
+        con un LOGGED BATCH: ambas tablas lo reciben o ninguna. bucket_10m es el bloque
+        de 10 minutos UTC del instante de creacion y shard el resto de dividir comentario_id
+        por 8. No valida la existencia del partido en otros motores.'
+      operationId: add_comment_api_v1_partidos__partido_id__comentarios_post
+      parameters:
+      - name: partido_id
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          examples:
+          - P001
+          title: Partido Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewComment'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope_CreatedComment_'
           headers:
             X-Request-ID:
               description: UUID de correlacion de la request y sus logs.
@@ -847,6 +921,46 @@ components:
       - items
       - siguiente_cursor
       title: Comments
+    CreatedComment:
+      properties:
+        comentario_id:
+          type: string
+          format: uuid
+          title: Comentario Id
+        partido_id:
+          type: string
+          pattern: ^P[0-9]{3,9}$
+          title: Partido Id
+          examples:
+          - P001
+        bucket_10m:
+          type: string
+          format: date-time
+          title: Bucket 10M
+        shard:
+          type: integer
+          title: Shard
+        creado_en:
+          type: string
+          format: date-time
+          title: Creado En
+        usuario_id:
+          type: string
+          title: Usuario Id
+        contenido:
+          type: string
+          title: Contenido
+      additionalProperties: false
+      type: object
+      required:
+      - comentario_id
+      - partido_id
+      - bucket_10m
+      - shard
+      - creado_en
+      - usuario_id
+      - contenido
+      title: CreatedComment
     DependencyStatus:
       properties:
         estado:
@@ -874,6 +988,15 @@ components:
       required:
       - data
       title: Envelope[Comments]
+    Envelope_CreatedComment_:
+      properties:
+        data:
+          $ref: '#/components/schemas/CreatedComment'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: Envelope[CreatedComment]
     Envelope_Events_:
       properties:
         data:
@@ -1192,6 +1315,27 @@ components:
       - eventos
       - eventos_truncados
       title: MatchObject
+    NewComment:
+      properties:
+        usuario_id:
+          type: string
+          pattern: ^[A-Za-z0-9_-]{1,40}$
+          title: Usuario Id
+          examples:
+          - USR002
+        contenido:
+          type: string
+          maxLength: 500
+          minLength: 1
+          title: Contenido
+          examples:
+          - Que golazo!
+      additionalProperties: false
+      type: object
+      required:
+      - usuario_id
+      - contenido
+      title: NewComment
     ObjectEvent:
       properties:
         id:

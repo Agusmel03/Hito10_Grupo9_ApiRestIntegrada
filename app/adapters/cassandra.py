@@ -4,7 +4,7 @@ from cassandra import DriverException
 from cassandra.auth import PlainTextAuthProvider
 from cassandra.cluster import Cluster, ExecutionProfile, EXEC_PROFILE_DEFAULT, NoHostAvailable
 from cassandra.policies import DCAwareRoundRobinPolicy, FallthroughRetryPolicy
-from cassandra.query import dict_factory
+from cassandra.query import BatchStatement, BatchType, dict_factory
 
 from app.observability import guarded
 
@@ -15,6 +15,7 @@ class CassandraAdapter:
         self.cluster = None
         self.session = None
         self.statement = None
+        self.inserts = None
         self.lock = Lock()
 
     def connect(self):
@@ -35,10 +36,17 @@ class CassandraAdapter:
                 session = cluster.connect(settings.cassandra_keyspace)
                 statement = session.prepare("""SELECT comentario_id, creado_en, usuario_id, contenido
                     FROM comentarios_por_partido WHERE partido_id=? AND bucket_10m=? AND shard=?""")
+                inserts = (
+                    session.prepare("""INSERT INTO comentarios_por_partido
+                        (partido_id, bucket_10m, shard, creado_en, comentario_id, usuario_id, contenido)
+                        VALUES (?,?,?,?,?,?,?)"""),
+                    session.prepare("""INSERT INTO comentarios_por_usuario
+                        (usuario_id, mes_bucket, creado_en, comentario_id, partido_id, contenido)
+                        VALUES (?,?,?,?,?,?)"""))
             except Exception:
                 cluster.shutdown()
                 raise
-            self.cluster, self.session, self.statement = cluster, session, statement
+            self.cluster, self.session, self.statement, self.inserts = cluster, session, statement, inserts
             return session
 
     @guarded("cassandra", (DriverException, NoHostAvailable, OSError))
@@ -49,6 +57,18 @@ class CassandraAdapter:
         result = session.execute(statement, paging_state=paging_state)
         # Iterating the ResultSet would fetch every page. Only expose current_rows.
         return list(result.current_rows), result.paging_state if result.has_more_pages else None
+
+    @guarded("cassandra", (DriverException, NoHostAvailable, OSError))
+    def add_comment(self, comment):
+        session = self.connect()
+        by_match, by_user = self.inserts
+        # LOGGED batch: las dos tablas desnormalizadas reciben el comentario o ninguna.
+        batch = BatchStatement(batch_type=BatchType.LOGGED)
+        batch.add(by_match, (comment["partido_id"], comment["bucket_10m"], comment["shard"],
+                             comment["creado_en"], comment["comentario_id"], comment["usuario_id"], comment["contenido"]))
+        batch.add(by_user, (comment["usuario_id"], comment["mes_bucket"], comment["creado_en"],
+                            comment["comentario_id"], comment["partido_id"], comment["contenido"]))
+        session.execute(batch)
 
     @guarded("cassandra", (DriverException, NoHostAvailable, OSError))
     def ping(self):

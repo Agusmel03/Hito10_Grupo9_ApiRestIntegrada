@@ -61,6 +61,17 @@ def test_real_cassandra_pagination(live_client):
     assert len(ids) == len(set(ids)) == 30
 
 
+def test_real_post_comment_is_readable_from_its_partition(live_client):
+    path = "/api/v1/partidos/P001/comentarios"
+    created = live_client.post(path, json={"usuario_id": "USR-TEST", "contenido": "Comentario de prueba de integracion"})
+    assert created.status_code == 201, created.text
+    data = created.json()["data"]
+    assert data["shard"] == UUID(data["comentario_id"]).int % 8
+    page = live_client.get(path, params={"bucket_10m": data["bucket_10m"], "shard": data["shard"], "limite": 100})
+    assert page.status_code == 200, page.text
+    assert data["comentario_id"] in [row["comentario_id"] for row in page.json()["data"]["items"]]
+
+
 def test_complete_lab_graph(live_client):
     response = live_client.get("/api/v1/grafo")
     assert response.status_code == 200, response.text

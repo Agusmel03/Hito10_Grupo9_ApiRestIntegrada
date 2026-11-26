@@ -1,8 +1,13 @@
-from datetime import timezone
+from datetime import datetime, timezone
+from uuid import uuid4
 from time import perf_counter
 
 from app.errors import ApiError, missing
+from app.metrics import COMMENT_WRITE
 from app.services.cursors import CursorCodec
+
+
+SHARDS = 8
 
 
 class FixtureService:
@@ -40,6 +45,27 @@ class FixtureService:
                 row["creado_en"] = row["creado_en"].replace(tzinfo=timezone.utc)
         return {"partido_id": match_id, "bucket_10m": query.bucket_10m, "shard": query.shard,
                 "items": rows, "siguiente_cursor": self.cursors.encode(next_state, partition) if next_state else None}
+
+    def add_comment(self, match_id, new):
+        now = datetime.now(timezone.utc)
+        now = now.replace(microsecond=now.microsecond // 1000 * 1000)  # Cassandra guarda milisegundos
+        comment_id = uuid4()
+        comment = {
+            "comentario_id": comment_id, "partido_id": match_id, "usuario_id": new.usuario_id,
+            "contenido": new.contenido, "creado_en": now,
+            # Bloque de 10 minutos del instante de creacion.
+            "bucket_10m": now.replace(minute=now.minute - now.minute % 10, second=0, microsecond=0),
+            # Shard: resto de dividir el identificador (un numero de 128 bits) por 8.
+            "shard": comment_id.int % SHARDS,
+            "mes_bucket": now.strftime("%Y-%m")}
+        start, result = perf_counter(), "error"
+        try:
+            self.adapters["cassandra"].add_comment(comment)
+            result = "ok"
+        finally:
+            COMMENT_WRITE.labels(result).observe(perf_counter()-start)
+        return {key: comment[key] for key in
+                ["comentario_id", "partido_id", "bucket_10m", "shard", "creado_en", "usuario_id", "contenido"]}
 
     def session(self, session_id):
         result = self.adapters["redis"].session(session_id)
